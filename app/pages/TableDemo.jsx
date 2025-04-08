@@ -18,7 +18,7 @@ export function TraceabilityMatrixTable({ requirements }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[180px]">Требования</TableHead>
+          <TableHead className="w-[180px]">Требования\Требования</TableHead>
           {requirements.map((requirement, index) => (
             <TableHead key={index} className="text-center">
               {requirement.name}
@@ -38,7 +38,7 @@ export function TraceabilityMatrixTable({ requirements }) {
           </TableRow>
         ))}
 
-        <TableRow>
+        {/* <TableRow>
           <TableCell className="font-medium">Важность</TableCell>
           {requirements.map((requirement, index) => (
             <TableCell key={index} className="text-center">
@@ -61,7 +61,7 @@ export function TraceabilityMatrixTable({ requirements }) {
               {requirement.initiatorType}
             </TableCell>
           ))}
-        </TableRow>
+        </TableRow> */}
       </TableBody>
     </Table>
   );

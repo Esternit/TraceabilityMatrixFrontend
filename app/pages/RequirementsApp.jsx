@@ -6,6 +6,7 @@ import RequirementsList from "./RequirementsList";
 import RequirementsTree from "./RequirementsTree";
 import TableDemo from "./TableDemo";
 import { useState } from "react";
+import { SourceRequirementMatrix } from "./SourceRequirementMatrix";
 
 // const req1 = new Requirement("Требование 1", "Компания X", 8);
 // const req2 = new Requirement("Требование 2", "Человек Y", 6);
@@ -40,7 +41,15 @@ export function RequirementsApp() {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "5rem",
+      }}
+    >
       <RequirementForm onAddRequirement={addRequirement} />
       {/* <RequirementsList requirements={requirements} />
       <RequirementsTree requirements={requirements} /> */}
@@ -49,7 +58,8 @@ export function RequirementsApp() {
         testCases={testCases}
         traceMatrix={traceMatrix}
       />
-      <RequirementsTree requirements={requirements} />
+      <SourceRequirementMatrix requirements={requirements} />
+      {/* <RequirementsTree requirements={requirements} /> */}
     </div>
   );
 }

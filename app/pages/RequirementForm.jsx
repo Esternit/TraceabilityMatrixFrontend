@@ -11,7 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // для выбора инициатора
+} from "@/components/ui/select";
 import Requirement from "../classes/Requirement";
 import {
   Form,
@@ -20,17 +20,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { MultiSelect } from "@/components/MultiSelect";
 
-// Создаем схему валидации с помощью Zod
 const formSchema = z.object({
   name: z.string().min(1, { message: "Название требования обязательно" }),
-  initiatorType: z.string().min(1, { message: "Тип инициатора обязателен" }),
+  // initiatorType: z.string().min(1, { message: "Тип инициатора обязателен" }),
   initiator: z.string().min(1, { message: "Инициатор обязателен" }),
-  importance: z
-    .number()
-    .min(0)
-    .max(10, { message: "Важность должна быть в пределах от 0 до 10" }),
-  dependency: z.string().optional(), // Зависимость от другого требования
+  // importance: z
+  //   .number()
+  //   .min(0)
+  //   .max(10, { message: "Важность должна быть в пределах от 0 до 10" }),
+  dependency: z.array(z.string()).optional(),
 });
 
 function RequirementForm({ onAddRequirement, allRequirements }) {
@@ -41,7 +41,7 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
       initiatorType: "",
       initiator: "",
       importance: 5,
-      dependency: "",
+      dependency: [],
     },
   });
 
@@ -50,30 +50,30 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
     reset,
     formState: { errors },
     setValue,
+    watch,
   } = methods;
 
   const [requirements, setRequirements] = useState(allRequirements || []);
   const [dependencies, setDependencies] = useState(allRequirements || []);
 
   const onSubmit = (data) => {
-    const { name, initiator, importance, dependency, initiatorType } = data;
-    const newRequirement = new Requirement(
-      name,
-      initiator,
-      importance,
-      initiatorType
-    );
+    const { name, initiator, dependency } = data;
+    const newRequirement = new Requirement(name, initiator, 0, "person");
 
-    if (dependency) {
-      const dependentReq = requirements.find((req) => req.name === dependency);
-      if (dependentReq) {
-        newRequirement.addDependency(dependentReq);
-      }
+    if (dependency && dependency.length > 0) {
+      dependency
+        .filter((depName) => depName !== "no-dependency")
+        .forEach((depName) => {
+          const dependentReq = requirements.find((req) => req.name === depName);
+          if (dependentReq) {
+            newRequirement.addDependency(dependentReq);
+          }
+        });
     }
 
-    if (initiatorType === "person" || initiatorType === "company") {
-      newRequirement.initiator = initiatorType + ": " + initiator;
-    }
+    // if (initiatorType === "person" || initiatorType === "company") {
+    //   newRequirement.initiator = initiatorType + ": " + initiator;
+    // }
 
     setRequirements((prev) => [...prev, newRequirement]);
     onAddRequirement(newRequirement);
@@ -99,6 +99,22 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
         </FormItem>
 
         <FormItem>
+          <FormLabel htmlFor="initiator">Инициатор</FormLabel>
+          <FormControl>
+            <Input
+              {...methods.register("initiator")}
+              name="initiator"
+              id="initiator"
+              placeholder="Введите инициатора"
+              required
+            />
+          </FormControl>
+          {errors.initiator && (
+            <FormMessage>{errors.initiator.message}</FormMessage>
+          )}
+        </FormItem>
+
+        {/* <FormItem>
           <FormLabel htmlFor="initiatorType">Тип инициатора</FormLabel>
           <FormControl>
             <Select
@@ -124,22 +140,6 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
         </FormItem>
 
         <FormItem>
-          <FormLabel htmlFor="initiator">Инициатор</FormLabel>
-          <FormControl>
-            <Input
-              {...methods.register("initiator")}
-              name="initiator"
-              id="initiator"
-              placeholder="Введите инициатора"
-              required
-            />
-          </FormControl>
-          {errors.initiator && (
-            <FormMessage>{errors.initiator.message}</FormMessage>
-          )}
-        </FormItem>
-
-        <FormItem>
           <FormLabel htmlFor="importance">Важность (0-10)</FormLabel>
           <FormControl>
             <Input
@@ -156,30 +156,20 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
           {errors.importance && (
             <FormMessage>{errors.importance.message}</FormMessage>
           )}
-        </FormItem>
+        </FormItem> */}
 
         <FormItem>
-          <FormLabel htmlFor="dependency">Зависимость от</FormLabel>
+          <FormLabel>Зависимость от</FormLabel>
           <FormControl>
-            <Select
-              {...methods.register("dependency")}
-              name="dependency"
-              onValueChange={(value) => setValue("dependency", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите зависимость" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="no-dependency">Нет зависимости</SelectItem>
-                  {requirements.map((req) => (
-                    <SelectItem key={req.name} value={req.name}>
-                      {req.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              options={[
+                { label: "Нет зависимости", value: "no-dependency" },
+                ...requirements.map((r) => ({ label: r.name, value: r.name })),
+              ]}
+              selected={watch("dependency") || []}
+              onChange={(values) => setValue("dependency", values)}
+              placeholder="Выберите зависимости"
+            />
           </FormControl>
           {errors.dependency && (
             <FormMessage>{errors.dependency.message}</FormMessage>
