@@ -1,14 +1,9 @@
 class Requirement {
-  constructor(name, initiator, importance, initiatorType) {
+  constructor(name, initiator, description) {
     this.name = name;
     this.initiator = initiator;
-    this.initiatorType = initiatorType;
-    this.importance = importance;
+    this.description = description;
     this.dependencies = [];
-  }
-
-  setImportance(value) {
-    this.importance = Math.max(0, Math.min(value, 10));
   }
 
   addDependency(requirement) {

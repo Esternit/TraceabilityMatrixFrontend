@@ -7,6 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { RequirementAlertDialog } from "./RequirementAlertDialog";
+
 export function TraceabilityMatrixTable({ requirements }) {
   const traceMatrix = requirements.map((requirement) =>
     requirements.map((otherRequirement) =>
@@ -28,40 +30,17 @@ export function TraceabilityMatrixTable({ requirements }) {
       </TableHeader>
       <TableBody>
         {requirements.map((requirement, rowIndex) => (
-          <TableRow key={rowIndex}>
-            <TableCell className="font-medium">{requirement.name}</TableCell>
-            {traceMatrix[rowIndex].map((cell, colIndex) => (
-              <TableCell key={colIndex} className="text-center text-xl">
-                {cell}
-              </TableCell>
-            ))}
-          </TableRow>
+          <RequirementAlertDialog key={rowIndex} requirement={requirement}>
+            <TableRow className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <TableCell className="font-medium">{requirement.name}</TableCell>
+              {traceMatrix[rowIndex].map((cell, colIndex) => (
+                <TableCell key={colIndex} className="text-center text-xl">
+                  {cell}
+                </TableCell>
+              ))}
+            </TableRow>
+          </RequirementAlertDialog>
         ))}
-
-        {/* <TableRow>
-          <TableCell className="font-medium">Важность</TableCell>
-          {requirements.map((requirement, index) => (
-            <TableCell key={index} className="text-center">
-              {requirement.importance}
-            </TableCell>
-          ))}
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Инициатор</TableCell>
-          {requirements.map((requirement, index) => (
-            <TableCell key={index} className="text-center">
-              {requirement.initiator}
-            </TableCell>
-          ))}
-        </TableRow>
-        <TableRow>
-          <TableCell className="font-medium">Тип инициатора</TableCell>
-          {requirements.map((requirement, index) => (
-            <TableCell key={index} className="text-center">
-              {requirement.initiatorType}
-            </TableCell>
-          ))}
-        </TableRow> */}
       </TableBody>
     </Table>
   );

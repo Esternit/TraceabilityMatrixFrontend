@@ -12,48 +12,50 @@ export function SourceRequirementMatrix({ requirements }) {
     new Set(requirements.map((req) => req.initiator))
   );
 
-  const sourceMatrix = initiators.map((initiator) =>
-    requirements.map((req) => (req.initiator === initiator ? "➕" : ""))
-  );
-
-  // Определим, какие столбцы нужно выделить
-  const columnsWithDependencies = requirements.map(
-    (req) => req.dependencies.length > 0
+  // Трансформируем данные: каждая строка — требование, каждая колонка — инициатор
+  const sourceMatrix = requirements.map((requirement) =>
+    initiators.map((initiator) =>
+      requirement.initiator === initiator ? "➕" : ""
+    )
   );
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[180px]">Источник\Требования</TableHead>
-          {requirements.map((requirement, index) => (
-            <TableHead
-              key={index}
-              className={`text-center ${
-                columnsWithDependencies[index] ? "bg-yellow-100" : ""
-              }`}
-            >
-              {requirement.name}
+          <TableHead className="w-[180px]">Требование\Источник</TableHead>
+          {initiators.map((initiator, index) => (
+            <TableHead key={index} className="text-center">
+              {initiator}
             </TableHead>
           ))}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {initiators.map((initiator, rowIndex) => (
-          <TableRow key={rowIndex}>
-            <TableCell className="font-medium">{initiator}</TableCell>
-            {sourceMatrix[rowIndex].map((cell, colIndex) => (
+        {requirements.map((requirement, rowIndex) => {
+          const hasDependencies = requirement.dependencies.length > 0;
+          return (
+            <TableRow key={rowIndex}>
               <TableCell
-                key={colIndex}
-                className={`text-center text-xl ${
-                  columnsWithDependencies[colIndex] ? "bg-yellow-100" : ""
+                className={`font-medium ${
+                  hasDependencies ? "bg-yellow-100" : ""
                 }`}
               >
-                {cell}
+                {requirement.name}
               </TableCell>
-            ))}
-          </TableRow>
-        ))}
+              {sourceMatrix[rowIndex].map((cell, colIndex) => (
+                <TableCell
+                  key={colIndex}
+                  className={`text-center text-xl ${
+                    hasDependencies ? "bg-yellow-100" : ""
+                  }`}
+                >
+                  {cell}
+                </TableCell>
+              ))}
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

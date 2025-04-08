@@ -26,6 +26,7 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Название требования обязательно" }),
   // initiatorType: z.string().min(1, { message: "Тип инициатора обязателен" }),
   initiator: z.string().min(1, { message: "Инициатор обязателен" }),
+  description: z.string().min(1, { message: "Описание обязательно" }),
   // importance: z
   //   .number()
   //   .min(0)
@@ -38,9 +39,8 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      initiatorType: "",
       initiator: "",
-      importance: 5,
+      description: "",
       dependency: [],
     },
   });
@@ -57,8 +57,8 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
   const [dependencies, setDependencies] = useState(allRequirements || []);
 
   const onSubmit = (data) => {
-    const { name, initiator, dependency } = data;
-    const newRequirement = new Requirement(name, initiator, 0, "person");
+    const { name, initiator, description, dependency } = data;
+    const newRequirement = new Requirement(name, initiator, description);
 
     if (dependency && dependency.length > 0) {
       dependency
@@ -111,6 +111,22 @@ function RequirementForm({ onAddRequirement, allRequirements }) {
           </FormControl>
           {errors.initiator && (
             <FormMessage>{errors.initiator.message}</FormMessage>
+          )}
+        </FormItem>
+
+        <FormItem>
+          <FormLabel htmlFor="description">Описание</FormLabel>
+          <FormControl>
+            <Input
+              {...methods.register("description")}
+              name="description"
+              id="description"
+              placeholder="Введите полное описание требования"
+              required
+            />
+          </FormControl>
+          {errors.description && (
+            <FormMessage>{errors.description.message}</FormMessage>
           )}
         </FormItem>
 
