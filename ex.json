@@ -1,0 +1,126 @@
+[
+    {
+        "column_text": "ID требования",
+        "background_color": "#f0f0f0",
+        "text_color": "#333333",
+        "text_alignment": {
+            "vertical": "center",
+            "horizontal": "left"
+        },
+        "sorting": {
+            "type": "numeric",
+            "enabled": true
+        },
+        "cells": [
+            {
+                "cell_text": "REQ-001",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "REQ-002",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "REQ-003",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            }
+        ]
+    },
+    {
+        "column_text": "Наименование требования",
+        "background_color": "#f0f0f0",
+        "text_color": "#333333",
+        "text_alignment": {
+            "vertical": "center",
+            "horizontal": "left"
+        },
+        "sorting": {
+            "type": "alphabetical",
+            "enabled": true
+        },
+        "cells": [
+            {
+                "cell_text": "Аутентификация пользователя",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "Хранение паролей",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "Восстановление пароля",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            }
+        ]
+    },
+    {
+        "column_text": "Статус трассировки",
+        "background_color": "#f0f0f0",
+        "text_color": "#333333",
+        "text_alignment": {
+            "vertical": "center",
+            "horizontal": "center"
+        },
+        "cells": [
+            {
+                "cell_text": "Выполнено",
+                "background_color": "#e6f7e6",
+                "text_color": "#2d862d",
+                "icon": {
+                    "name": "check",
+                    "position": "left"
+                }
+            },
+            {
+                "cell_text": "В работе",
+                "background_color": "#fffae6",
+                "text_color": "#cc7a00",
+                "icon": {
+                    "name": "progress",
+                    "position": "left"
+                }
+            },
+            {
+                "cell_text": "Не начато",
+                "background_color": "#ffe6e6",
+                "text_color": "#cc0000",
+                "icon": {
+                    "name": "warning",
+                    "position": "left"
+                }
+            }
+        ]
+    },
+    {
+        "column_text": "Связанные тест-кейсы",
+        "background_color": "#f0f0f0",
+        "text_color": "#333333",
+        "text_alignment": {
+            "vertical": "center",
+            "horizontal": "left"
+        },
+        "cells": [
+            {
+                "cell_text": "TC-001, TC-002",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "TC-003",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            },
+            {
+                "cell_text": "TC-004, TC-005, TC-006",
+                "background_color": "#ffffff",
+                "text_color": "#000000"
+            }
+        ]
+    }
+]

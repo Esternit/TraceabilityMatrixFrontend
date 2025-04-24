@@ -7,6 +7,9 @@ import RequirementsTree from "./RequirementsTree";
 import TableDemo from "./TableDemo";
 import { useState } from "react";
 import { SourceRequirementMatrix } from "./SourceRequirementMatrix";
+import { RequirementsMatrix } from "./RequirementsMatrix";
+import { mockData } from "@/app/data/requirements-matrix-mock";
+import { RequirementsChart } from "./RequirementsChart";
 
 // const req1 = new Requirement("Требование 1", "Компания X", 8);
 // const req2 = new Requirement("Требование 2", "Человек Y", 6);
@@ -50,16 +53,18 @@ export function RequirementsApp() {
         gap: "5rem",
       }}
     >
-      <RequirementForm onAddRequirement={addRequirement} />
+      {/* <RequirementForm onAddRequirement={addRequirement} /> */}
       {/* <RequirementsList requirements={requirements} />
       <RequirementsTree requirements={requirements} /> */}
-      <TableDemo
+      {/* <TableDemo
         requirements={requirements}
         testCases={testCases}
         traceMatrix={traceMatrix}
       />
-      <SourceRequirementMatrix requirements={requirements} />
+      <SourceRequirementMatrix requirements={requirements} /> */}
       {/* <RequirementsTree requirements={requirements} /> */}
+      <RequirementsMatrix columns={mockData} />
+      {/* <RequirementsChart columns={mockData} /> */}
     </div>
   );
 }
