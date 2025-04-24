@@ -18,6 +18,8 @@ import {
     Link as LinkIcon,
     Pin,
     PinOff,
+    ChevronUp,
+    ChevronDown,
 } from "lucide-react";
 import { useState, ReactNode, useRef, useEffect } from "react";
 
@@ -161,7 +163,8 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                             const alignment = col.text_alignment || defaultAlignment;
                             const isPinned = pinnedColumns.includes(colIndex);
                             const width = columnWidths[colIndex] || 'auto';
-                            const left = calculateLeftPosition(colIndex, true);
+                            const left = calculateLeftPosition(colIndex);
+                            const isSorted = sortConfig.columnIndex === colIndex;
                             
                             return (
                                 <TableHead
@@ -179,7 +182,8 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                         width: `${width}px`,
                                         whiteSpace: 'nowrap'
                                     }}
-                                    className="group"
+                                    className={`group ${col.sorting?.enabled ? 'cursor-pointer hover:bg-opacity-90' : ''}`}
+                                    onClick={() => col.sorting?.enabled && handleSort(colIndex)}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div
@@ -192,23 +196,16 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                                         : alignment.horizontal === "right"
                                                         ? "flex-end"
                                                         : "center",
-                                                gap: "0.5rem",
+                                                gap: "0.25rem",
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis'
                                             }}
-                                            onClick={() => handleSort(colIndex)}
-                                            className={col.sorting?.enabled ? "cursor-pointer" : ""}
                                         >
                                             {col.column_text}
-                                            {col.sorting?.enabled && (
-                                                <>
-                                                    <ArrowUpDown className="h-4 w-4 flex-shrink-0" />
-                                                    {sortConfig.columnIndex === colIndex && (
-                                                        <span className="flex-shrink-0">
-                                                            {sortConfig.direction === "asc" ? "↑" : "↓"}
-                                                        </span>
-                                                    )}
-                                                </>
+                                            {isSorted && (
+                                                sortConfig.direction === "asc" 
+                                                    ? <ChevronUp className="h-4 w-4 flex-shrink-0" />
+                                                    : <ChevronDown className="h-4 w-4 flex-shrink-0" />
                                             )}
                                         </div>
                                         <button 
