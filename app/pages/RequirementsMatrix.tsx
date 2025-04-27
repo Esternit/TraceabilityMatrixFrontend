@@ -198,86 +198,79 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                             const isSorted = sortConfig?.columnIndex === colIndex;
                             
                             return (
-<TableHead
-    key={colIndex}
-    onContextMenu={(e) => {
-        e.preventDefault();
-        togglePinColumn(colIndex);
-    }}
-    style={{
-        backgroundColor: isPinned ? col.background_color || '#f8fafc' : col.background_color,
-        color: col.text_color,
-        textAlign: alignment.horizontal,
-        verticalAlign: alignment.vertical,
-        position: isPinned ? 'sticky' : undefined,
-        left: left !== undefined ? `${left}px` : undefined,
-        zIndex: isPinned ? 30 : 1,
-        boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
-        minWidth: `${width}px`,
-        width: `${width}px`,
-        whiteSpace: 'nowrap',
-        cursor: 'context-menu',
-    }}
-    className={`group ${col.sorting?.enabled ? 'hover:bg-opacity-90' : ''}`}
->
-    <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
-        
-        {/* Блок текст + пин + сортировка */}
-        <div
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent:
-                    alignment.horizontal === "left"
-                        ? "flex-start"
-                        : alignment.horizontal === "right"
-                        ? "flex-end"
-                        : "center",
-                gap: "0.25rem",
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                flexGrow: 1,
-            }}
-        >
-            {/* Текст */}
-            <span className="overflow-hidden text-ellipsis">{col.column_text}</span>
+                                    <TableHead
+                                        key={colIndex}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            togglePinColumn(colIndex);
+                                        }}
+                                        style={{
+                                            backgroundColor: isPinned ? col.background_color || '#f8fafc' : col.background_color,
+                                            color: col.text_color,
+                                            textAlign: alignment.horizontal,
+                                            verticalAlign: alignment.vertical,
+                                            position: isPinned ? 'sticky' : undefined,
+                                            left: left !== undefined ? `${left}px` : undefined,
+                                            zIndex: isPinned ? 30 : 1,
+                                            boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
+                                            minWidth: `${width}px`,
+                                            width: `${width}px`,
+                                            whiteSpace: 'nowrap',
+                                            cursor: 'context-menu',
+                                        }}
+                                        className={`group ${col.sorting?.enabled ? 'hover:bg-opacity-90' : ''}`}
+                                    >
+                                        <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
+                                            
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent:
+                                                        alignment.horizontal === "left"
+                                                            ? "flex-start"
+                                                            : alignment.horizontal === "right"
+                                                            ? "flex-end"
+                                                            : "center",
+                                                    gap: "0.25rem",
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    flexGrow: 1,
+                                                }}
+                                            >
+                                                <span className="overflow-hidden text-ellipsis">{col.column_text}</span>
 
-            {/* Пин */}
-            {isPinned && (
-                <div className="flex-shrink-0 text-white/70 ml-1">
-                    <Pin className="h-4 w-4" />
-                </div>
-            )}
+                                                {isPinned && (
+                                                    <div className="flex-shrink-0 text-white/70 ml-1">
+                                                        <Pin className="h-4 w-4" />
+                                                    </div>
+                                                )}
 
-            {/* Одна стрелка сортировки */}
-            {sortConfig?.columnIndex === colIndex && (
-                <div className="flex-shrink-0 ml-1">
-                    {sortConfig.direction === "asc" ? (
-                        // Стрелка вверх
-                        <div className="w-1.5 h-1.5 border-t-2 border-r-2 transform rotate-[-45deg] text-current" />
-                    ) : sortConfig.direction === "desc" ? (
-                        // Стрелка вниз
-                        <div className="w-1.5 h-1.5 border-b-2 border-r-2 transform rotate-[45deg] text-current" />
-                    ) : null}
-                </div>
-            )}
-        </div>
+                                                {sortConfig?.columnIndex === colIndex && (
+                                                    <div className="flex-shrink-0 ml-1">
+                                                        {sortConfig.direction === "asc" ? (
+                                                            <div className="w-1.5 h-1.5 border-t-2 border-r-2 transform rotate-[-45deg] text-current" />
+                                                        ) : sortConfig.direction === "desc" ? (
+                                                            <div className="w-1.5 h-1.5 border-b-2 border-r-2 transform rotate-[45deg] text-current" />
+                                                        ) : null}
+                                                    </div>
+                                                )}
+                                            </div>
 
-        {/* Фильтр справа */}
-        <ColumnFilter
-            uniqueValues={data[colIndex] || []}
-            activeSort={sortConfig?.columnIndex === colIndex ? sortConfig.direction : null}
-            onSortAsc={() => handleSort(colIndex, "asc")}
-            onSortDesc={() => handleSort(colIndex, "desc")}
-            onClearSort={() => {
-                setColumns([...initialColumns]);
-                setSortConfig(null);
-            }}
-            onFilterChange={(selected) => handleFilter(colIndex, selected)}
-            columns={initialColumns[colIndex]}
-        />
-    </div>
-</TableHead>
+                                            <ColumnFilter
+                                                uniqueValues={data[colIndex] || []}
+                                                activeSort={sortConfig?.columnIndex === colIndex ? sortConfig.direction : null}
+                                                onSortAsc={() => handleSort(colIndex, "asc")}
+                                                onSortDesc={() => handleSort(colIndex, "desc")}
+                                                onClearSort={() => {
+                                                    setColumns([...initialColumns]);
+                                                    setSortConfig(null);
+                                                }}
+                                                onFilterChange={(selected) => handleFilter(colIndex, selected)}
+                                                columns={initialColumns[colIndex]}
+                                            />
+                                        </div>
+                                    </TableHead>
                             );
                         })}
                     </TableRow>
