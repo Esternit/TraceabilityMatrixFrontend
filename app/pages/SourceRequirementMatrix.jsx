@@ -12,7 +12,6 @@ export function SourceRequirementMatrix({ requirements }) {
     new Set(requirements.map((req) => req.initiator))
   );
 
-  // Трансформируем данные: каждая строка — требование, каждая колонка — инициатор
   const sourceMatrix = requirements.map((requirement) =>
     initiators.map((initiator) =>
       requirement.initiator === initiator ? "➕" : ""

@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TableColumnsSchema",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/Column"
+  },
+  "definitions": {
+    "Column": {
+      "type": "object",
+      "properties": {
+        "column_text": { "type": "string" },
+        "background_color": { "type": "string" },
+        "text_color": { "type": "string" },
+        "text_alignment": { "$ref": "#/definitions/TextAlignment" },
+        "sorting": { "$ref": "#/definitions/Sorting" },
+        "filters_enabled": { "type": "boolean" },
+        "cells": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Cell" }
+        }
+      },
+      "required": ["column_text", "cells"]
+    },
+    "TextAlignment": {
+      "type": "object",
+      "properties": {
+        "vertical": { "enum": ["top", "bottom", "center"] },
+        "horizontal": { "enum": ["left", "right", "center"] }
+      },
+      "required": ["vertical", "horizontal"]
+    },
+    "Sorting": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["alphabetical", "numeric"] },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["type", "enabled"]
+    },
+    "Cell": {
+      "type": "object",
+      "properties": {
+        "cell_text": { "type": "string" },
+        "icon": { "$ref": "#/definitions/Icon" },
+        "background_color": { "type": "string" },
+        "text_color": { "type": "string" },
+        "text_alignment": { "$ref": "#/definitions/TextAlignment" }
+      }
+    },
+    "Icon": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "position": { "enum": ["left", "right"] }
+      },
+      "required": ["name", "position"]
+    }
+  }
+}

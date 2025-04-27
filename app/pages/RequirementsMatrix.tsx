@@ -22,6 +22,8 @@ import {
     ChevronDown,
 } from "lucide-react";
 import { useState, ReactNode, useRef, useEffect } from "react";
+import { ColumnFilter } from "./ColumnFilter";
+import { init } from "next/dist/compiled/webpack/webpack";
 
 type TextAlignment = {
     vertical: "top" | "center" | "bottom";
@@ -71,11 +73,10 @@ const iconMap: Record<IconName, ReactNode> = {
 };
 
 export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
+    const [filters, setFilters] = useState<Record<number, string[]>>({});
+    const [data, setData] = useState<{ [key: number]: string[] }>({});
     const [columns, setColumns] = useState<Column[]>(initialColumns);
-    const [sortConfig, setSortConfig] = useState<{
-        columnIndex: number | null;
-        direction: "asc" | "desc";
-    }>({ columnIndex: null, direction: "asc" });
+    const [sortConfig, setSortConfig] = useState<{ columnIndex: number; direction: "asc" | "desc" } | null>(null);
     const [pinnedColumns, setPinnedColumns] = useState<number[]>([]);
     const [columnWidths, setColumnWidths] = useState<number[]>([]);
     const tableRef = useRef<HTMLTableElement>(null);
@@ -86,6 +87,14 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
         vertical: "center",
         horizontal: "left",
     };
+
+    useEffect(() => {
+        const uniqueValuesMap: { [key: number]: string[] } = {};
+        initialColumns.forEach((col, colIndex) => {
+          uniqueValuesMap[colIndex] = [...new Set(col.cells.map(cell => cell.cell_text))];
+        });
+        setData(uniqueValuesMap);
+      }, [initialColumns]);
 
     useEffect(() => {
         if (tableRef.current) {
@@ -104,35 +113,39 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
         );
     };
 
-    const handleSort = (columnIndex: number) => {
+    const handleSort = (columnIndex: number, direction: "asc" | "desc") => {
+        if (sortConfig && sortConfig.columnIndex === columnIndex && sortConfig.direction === direction) {
+            setColumns([...initialColumns]);
+            setSortConfig(null);
+            return;
+        }
+    
         const column = columns[columnIndex];
         if (!column.sorting?.enabled) return;
-
-        let direction: "asc" | "desc" = "asc";
-        if (sortConfig.columnIndex === columnIndex && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-
-        const sortedColumns = [...columns];
-        const cells = [...column.cells];
-
-        cells.sort((a, b) => {
+    
+        const sortedColumns = columns.map((col) => ({ ...col, cells: [...col.cells] }));
+    
+        const rows = sortedColumns[0].cells.map((_, rowIndex) => sortedColumns.map((col) => col.cells[rowIndex]));
+    
+        rows.sort((rowA, rowB) => {
+            const cellA = rowA[columnIndex];
+            const cellB = rowB[columnIndex];
+    
             if (column.sorting?.type === "numeric") {
-                const numA = parseFloat(a.cell_text.replace(/[^0-9.]/g, "")) || 0;
-                const numB = parseFloat(b.cell_text.replace(/[^0-9.]/g, "")) || 0;
+                const numA = parseFloat(cellA.cell_text.replace(/[^0-9.]/g, "")) || 0;
+                const numB = parseFloat(cellB.cell_text.replace(/[^0-9.]/g, "")) || 0;
                 return direction === "asc" ? numA - numB : numB - numA;
             } else {
                 return direction === "asc"
-                    ? a.cell_text.localeCompare(b.cell_text)
-                    : b.cell_text.localeCompare(a.cell_text);
+                    ? cellA.cell_text.localeCompare(cellB.cell_text)
+                    : cellB.cell_text.localeCompare(cellA.cell_text);
             }
         });
-
-        const sortedIndices = cells.map((cell) => column.cells.indexOf(cell));
-        sortedColumns.forEach((col) => {
-            col.cells = sortedIndices.map((index) => col.cells[index]);
+    
+        sortedColumns.forEach((col, colIndex) => {
+            col.cells = rows.map((row) => row[colIndex]);
         });
-
+    
         setColumns(sortedColumns);
         setSortConfig({ columnIndex, direction });
     };
@@ -149,9 +162,27 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
             left += columnWidths[prevColIndex] || 0;
         }
         
-        console.log(left, colIndex, pinnedColumns, columnWidths);
         return left;
     };
+
+    const handleFilter = (columnIndex: number, selectedValues: string[]) => {
+    
+        const newColumns = initialColumns.map((col) => ({
+            ...col,
+            cells: [...col.cells],
+        }));
+    
+        const rowIndices = initialColumns[columnIndex].cells
+            .map((cell, index) => selectedValues.includes(cell.cell_text) ? index : null)
+            .filter((index): index is number => index !== null);
+    
+        newColumns.forEach((col, colIdx) => {
+            col.cells = rowIndices.map(rowIndex => initialColumns[colIdx].cells[rowIndex]);
+        });
+    
+        setColumns(newColumns);
+    };
+
 
     return (
         <div className="overflow-auto"
@@ -164,72 +195,104 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                             const isPinned = pinnedColumns.includes(colIndex);
                             const width = columnWidths[colIndex] || 'auto';
                             const left = calculateLeftPosition(colIndex);
-                            const isSorted = sortConfig.columnIndex === colIndex;
+                            const isSorted = sortConfig?.columnIndex === colIndex;
                             
                             return (
-                                <TableHead
-                                    key={colIndex}
-                                    style={{
-                                        backgroundColor: isPinned ? col.background_color || '#f8fafc' : col.background_color,
-                                        color: col.text_color,
-                                        textAlign: alignment.horizontal,
-                                        verticalAlign: alignment.vertical,
-                                        position: isPinned ? 'sticky' : undefined,
-                                        left: left !== undefined ? `${left}px` : undefined,
-                                        zIndex: isPinned ? 30 : 1,
-                                        boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
-                                        minWidth: `${width}px`,
-                                        width: `${width}px`,
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                    className={`group ${col.sorting?.enabled ? 'cursor-pointer hover:bg-opacity-90' : ''}`}
-                                    onClick={() => col.sorting?.enabled && handleSort(colIndex)}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent:
-                                                    alignment.horizontal === "left"
-                                                        ? "flex-start"
-                                                        : alignment.horizontal === "right"
-                                                        ? "flex-end"
-                                                        : "center",
-                                                gap: "0.25rem",
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
-                                            }}
-                                        >
-                                            {col.column_text}
-                                            {isSorted && (
-                                                sortConfig.direction === "asc" 
-                                                    ? <ChevronUp className="h-4 w-4 flex-shrink-0" />
-                                                    : <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                                            )}
-                                        </div>
-                                        <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                togglePinColumn(colIndex);
-                                            }}
-                                            className={`ml-2 flex-shrink-0 ${isPinned ? 'text-white' : 'text-white/70 hover:text-white'}`}
-                                            title={isPinned ? "Unpin column" : "Pin column"}
-                                        >
-                                            {isPinned ? (
-                                                <PinOff className="h-4 w-4" />
-                                            ) : (
-                                                <Pin className="h-4 w-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                </TableHead>
+<TableHead
+    key={colIndex}
+    onContextMenu={(e) => {
+        e.preventDefault();
+        togglePinColumn(colIndex);
+    }}
+    style={{
+        backgroundColor: isPinned ? col.background_color || '#f8fafc' : col.background_color,
+        color: col.text_color,
+        textAlign: alignment.horizontal,
+        verticalAlign: alignment.vertical,
+        position: isPinned ? 'sticky' : undefined,
+        left: left !== undefined ? `${left}px` : undefined,
+        zIndex: isPinned ? 30 : 1,
+        boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
+        minWidth: `${width}px`,
+        width: `${width}px`,
+        whiteSpace: 'nowrap',
+        cursor: 'context-menu',
+    }}
+    className={`group ${col.sorting?.enabled ? 'hover:bg-opacity-90' : ''}`}
+>
+    <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
+        
+        {/* Блок текст + пин + сортировка */}
+        <div
+            style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                    alignment.horizontal === "left"
+                        ? "flex-start"
+                        : alignment.horizontal === "right"
+                        ? "flex-end"
+                        : "center",
+                gap: "0.25rem",
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                flexGrow: 1,
+            }}
+        >
+            {/* Текст */}
+            <span className="overflow-hidden text-ellipsis">{col.column_text}</span>
+
+            {/* Пин */}
+            {isPinned && (
+                <div className="flex-shrink-0 text-white/70 ml-1">
+                    <Pin className="h-4 w-4" />
+                </div>
+            )}
+
+            {/* Одна стрелка сортировки */}
+            {sortConfig?.columnIndex === colIndex && (
+                <div className="flex-shrink-0 ml-1">
+                    {sortConfig.direction === "asc" ? (
+                        // Стрелка вверх
+                        <div className="w-1.5 h-1.5 border-t-2 border-r-2 transform rotate-[-45deg] text-current" />
+                    ) : sortConfig.direction === "desc" ? (
+                        // Стрелка вниз
+                        <div className="w-1.5 h-1.5 border-b-2 border-r-2 transform rotate-[45deg] text-current" />
+                    ) : null}
+                </div>
+            )}
+        </div>
+
+        {/* Фильтр справа */}
+        <ColumnFilter
+            uniqueValues={data[colIndex] || []}
+            activeSort={sortConfig?.columnIndex === colIndex ? sortConfig.direction : null}
+            onSortAsc={() => handleSort(colIndex, "asc")}
+            onSortDesc={() => handleSort(colIndex, "desc")}
+            onClearSort={() => {
+                setColumns([...initialColumns]);
+                setSortConfig(null);
+            }}
+            onFilterChange={(selected) => handleFilter(colIndex, selected)}
+            columns={initialColumns[colIndex]}
+        />
+    </div>
+</TableHead>
                             );
                         })}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {Array.from({ length: columns[0].cells.length }).map((_, rowIndex) => (
+                    {Array.from({ length: columns[0].cells.length })
+                        .filter((_, rowIndex) => {
+                            return columns.every((col, colIndex) => {
+                                const selected = filters[colIndex];
+                                if (!selected) return true;
+                                const cellValue = col.cells[rowIndex].cell_text;
+                                return selected.includes(cellValue);
+                            });
+                        })
+                    .map((_, rowIndex) => (
                         <TableRow key={rowIndex}>
                             {columns.map((col, colIndex) => {
                                 const cell = col.cells[rowIndex];
