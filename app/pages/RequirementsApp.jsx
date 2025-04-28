@@ -9,7 +9,9 @@ import { useState } from "react";
 import { SourceRequirementMatrix } from "./SourceRequirementMatrix";
 import { RequirementsMatrix } from "./RequirementsMatrix";
 import { mockData } from "@/app/data/requirements-matrix-mock";
+import { mockDataTree } from "../data/requirements-tree";
 import { RequirementsChart } from "./RequirementsChart";
+import RequirementsMindMap from "./RequirementsMindMap";
 
 // const req1 = new Requirement("Требование 1", "Компания X", 8);
 // const req2 = new Requirement("Требование 2", "Человек Y", 6);
@@ -19,22 +21,6 @@ import { RequirementsChart } from "./RequirementsChart";
 // req3.addDependency(req1);
 
 // const requirements = [req1, req2, req3];
-
-const testCases = [
-  "Тест-кейс 1",
-  "Тест-кейс 2",
-  "Тест-кейс 3",
-  "Тест-кейс 4",
-  "Тест-кейс 5",
-];
-
-const traceMatrix = [
-  [false, true, false, false, false],
-  [false, false, true, false, false],
-  [true, false, true, false, false],
-  [false, false, false, false, true],
-  [false, false, false, true, false],
-];
 
 export function RequirementsApp() {
   const [requirements, setRequirements] = useState([]);
@@ -64,6 +50,7 @@ export function RequirementsApp() {
       <SourceRequirementMatrix requirements={requirements} /> */}
       {/* <RequirementsTree requirements={requirements} /> */}
       <RequirementsMatrix columns={mockData} />
+      {/* <RequirementsMindMap requirementsData={mockDataTree} /> */}
       {/* <RequirementsChart columns={mockData} /> */}
     </div>
   );
