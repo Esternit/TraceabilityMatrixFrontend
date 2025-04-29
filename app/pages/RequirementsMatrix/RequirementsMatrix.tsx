@@ -1,76 +1,23 @@
 import {
+    useState,
+    useEffect,
+    useRef
+} from "react";
+
+import {
     Table,
-    TableBody,
-    TableCell,
-    TableHead,
     TableHeader,
     TableRow,
+    TableHead,
+    TableBody,
+    TableCell
 } from "@/components/ui/table";
-import {
-    Check,
-    Loader2,
-    AlertTriangle,
-    ArrowUpDown,
-    FileText,
-    ClipboardList,
-    User,
-    Bug,
-    Link as LinkIcon,
-    Pin,
-    PinOff,
-    ChevronUp,
-    ChevronDown,
-} from "lucide-react";
-import { useState, ReactNode, useRef, useEffect } from "react";
+import { TextAlignment } from "./types";
+import { Pin } from "lucide-react";
+import { Column, Props } from "./types";
+import { iconMap } from "./iconMap";
 import { ColumnFilter } from "./ColumnFilter";
-import { init } from "next/dist/compiled/webpack/webpack";
-
-type TextAlignment = {
-    vertical: "top" | "center" | "bottom";
-    horizontal: "left" | "center" | "right";
-};
-
-type IconName = "check" | "progress" | "warning" | "document" | "test-case" | "user" | "bug" | "link";
-
-type Icon = {
-    name: IconName;
-    position: "left" | "right";
-};
-
-type Cell = {
-    cell_text: string;
-    background_color?: string;
-    text_color?: string;
-    text_alignment?: TextAlignment;
-    icon?: Icon;
-};
-
-type Column = {
-    column_text: string;
-    background_color?: string;
-    text_color?: string;
-    text_alignment?: TextAlignment;
-    sorting?: {
-        type: "alphabetical" | "numeric";
-        enabled: boolean;
-    };
-    cells: Cell[];
-};
-
-type Props = {
-    columns: Column[];
-};
-
-const iconMap: Record<IconName, ReactNode> = {
-    check: <Check className="h-4 w-4" />,
-    progress: <Loader2 className="h-4 w-4 animate-spin" />,
-    warning: <AlertTriangle className="h-4 w-4 text-yellow-500" />,
-    document: <FileText className="h-4 w-4" />,
-    "test-case": <ClipboardList className="h-4 w-4" />,
-    user: <User className="h-4 w-4" />,
-    bug: <Bug className="h-4 w-4 text-red-500" />,
-    link: <LinkIcon className="h-4 w-4 text-blue-500" />,
-};
+import { defaultAlignment } from "./utils";
 
 export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const [filters, setFilters] = useState<Record<number, string[]>>({});

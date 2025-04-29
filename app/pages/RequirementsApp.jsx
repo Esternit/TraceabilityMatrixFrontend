@@ -7,20 +7,11 @@ import RequirementsTree from "./RequirementsTree";
 import TableDemo from "./TableDemo";
 import { useState } from "react";
 import { SourceRequirementMatrix } from "./SourceRequirementMatrix";
-import { RequirementsMatrix } from "./RequirementsMatrix";
+import { RequirementsMatrix } from "./RequirementsMatrix/RequirementsMatrix";
 import { mockData } from "@/app/data/requirements-matrix-mock";
 import { mockDataTree } from "../data/requirements-tree";
 import { RequirementsChart } from "./RequirementsChart";
 import RequirementsMindMap from "./RequirementsMindMap";
-
-// const req1 = new Requirement("Требование 1", "Компания X", 8);
-// const req2 = new Requirement("Требование 2", "Человек Y", 6);
-// const req3 = new Requirement("Требование 3", "Требование 1", 7);
-
-// req2.addDependency(req1);
-// req3.addDependency(req1);
-
-// const requirements = [req1, req2, req3];
 
 export function RequirementsApp() {
   const [requirements, setRequirements] = useState([]);
