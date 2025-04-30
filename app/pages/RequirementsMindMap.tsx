@@ -50,7 +50,7 @@ export default function RequirementsMindMap({ requirementsData }: RequirementsMi
 
 // Генерация узлов
 function generateNodes(requirements: RequirementSection[]) {
-  let nodes: any[] = [];
+  const nodes: any[] = [];
   let yOffset = 0;
 
   requirements.forEach((section, index) => {
@@ -135,7 +135,7 @@ function generateNodes(requirements: RequirementSection[]) {
 
 // Генерация связей
 function generateEdges(requirements: RequirementSection[]) {
-  let edges: any[] = [];
+  const edges: any[] = [];
 
   requirements.forEach((section) => {
     const sectionId = `section-${section.id}`;
