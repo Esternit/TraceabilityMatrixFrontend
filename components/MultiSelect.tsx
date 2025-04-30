@@ -8,8 +8,6 @@ import {
   import { Checkbox } from "@/components/ui/checkbox"
   import { Button } from "@/components/ui/button"
   import { Check, ChevronDown } from "lucide-react"
-  import { useEffect, useRef, useState } from "react"
-  import { cn } from "@/lib/utils"
   
   interface MultiSelectProps {
     options: { label: string; value: string }[]

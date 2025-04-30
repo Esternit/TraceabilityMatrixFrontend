@@ -1,5 +1,3 @@
-import Image from "next/image";
-import TableDemo from "./pages/TableDemo";
 import RequirementsApp from "./pages/RequirementsApp";
 
 export default function Home() {
