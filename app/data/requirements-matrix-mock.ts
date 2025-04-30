@@ -95,6 +95,10 @@ export const mockData =
         "vertical": "center",
         "horizontal": "center"
       },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
+      },
       "cells": [
         {
           "cell_text": "Готово",
@@ -178,6 +182,10 @@ export const mockData =
         "vertical": "center",
         "horizontal": "center"
       },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
+      },
       "cells": [
         {
           "cell_text": "https://github.com/Esternit/TraceabilityMatrix/commit/47e5083a0d41c4eb42d6817106f9027fdce7928d",
@@ -212,6 +220,10 @@ export const mockData =
       "text_alignment": {
         "vertical": "center",
         "horizontal": "center"
+      },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
       },
       "cells": [
         {
@@ -248,6 +260,10 @@ export const mockData =
         "vertical": "center",
         "horizontal": "center"
       },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
+      },
       "cells": [
         {
           "cell_text": "Вроде не нужно"
@@ -282,6 +298,10 @@ export const mockData =
       "text_alignment": {
         "vertical": "center",
         "horizontal": "center"
+      },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
       },
       "cells": [
         {

@@ -181,13 +181,15 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                         color: col.text_color,
                                         textAlign: alignment.horizontal,
                                         verticalAlign: alignment.vertical,
-                                        position: isPinned ? 'sticky' : undefined,
+                                        position: isPinned ? 'sticky' : 'relative',
                                         left: left !== undefined ? `${left}px` : undefined,
                                         zIndex: isPinned ? 30 : 1,
                                         boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
                                         whiteSpace: 'nowrap',
                                         maxWidth: "300px",
                                         overflow: 'hidden',
+                                        height: '40px',
+                                        minHeight: '40px',
                                         textOverflow: 'ellipsis',
                                         cursor: 'context-menu',
                                     }}
@@ -241,19 +243,20 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                             onFilterChange={(selected) => handleFilter(colIndex, selected)}
                                             columns={initialColumns[colIndex]}
                                         />
-                                    <div
-                                        onMouseDown={(e) => handleMouseDown(e, colIndex)}
-                                        style={{
-                                            position: "absolute",
-                                            top: 0,
-                                            right: 0,
-                                            height: "100%",
-                                            width: "5px",
-                                            cursor: "col-resize",
-                                            zIndex: 50,
-                                        }}
-                                        />
+
                                 </div>
+                                <div
+                                    onMouseDown={(e) => handleMouseDown(e, colIndex)}
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        right: 0,
+                                        height: "100%",
+                                        width: "5%",
+                                        cursor: "col-resize",
+                                        zIndex: 50,
+                                    }}
+                                />
                                 </TableHead>
                             );
                         })}
