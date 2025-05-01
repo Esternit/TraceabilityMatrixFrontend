@@ -17,7 +17,7 @@ import { Pin } from "lucide-react";
 import { Column, Props } from "./types";
 import { iconMap } from "./iconMap";
 import { ColumnFilter } from "./ColumnFilter";
-import { defaultAlignment } from "./utils";
+import { handleSort, handleMouseDown, togglePinColumn, calculateLeftPosition, handleFilter } from "./utils";
 
 export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const [filters, setFilters] = useState<Record<number, string[]>>({});
@@ -33,31 +33,6 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const defaultAlignment: TextAlignment = {
         vertical: "center",
         horizontal: "left",
-    };
-
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, colIndex: number) => {
-        e.preventDefault();
-    
-        const startX = e.clientX;
-        const startWidth = columnWidths[colIndex] || 150;
-    
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const newWidth = Math.max(50, Math.min(600, startWidth + (moveEvent.clientX - startX)));
-    
-            setColumnWidths((prev) => {
-                const updated = [...prev];
-                updated[colIndex] = newWidth;
-                return updated;
-            });
-        };
-    
-        const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-        };
-    
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
     };
 
     useEffect(() => {
@@ -77,84 +52,6 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
         }
     }, [columns, pinnedColumns]);
 
-    const togglePinColumn = (columnIndex: number) => {
-        setPinnedColumns(prev => 
-            prev.includes(columnIndex)
-                ? prev.filter(i => i !== columnIndex)
-                : [...prev, columnIndex].sort((a, b) => a - b)
-        );
-    };
-
-    const handleSort = (columnIndex: number, direction: "asc" | "desc") => {
-        if (sortConfig && sortConfig.columnIndex === columnIndex && sortConfig.direction === direction) {
-            setColumns([...initialColumns]);
-            setSortConfig(null);
-            return;
-        }
-    
-        const column = columns[columnIndex];
-        if (!column.sorting?.enabled) return;
-    
-        const sortedColumns = columns.map((col) => ({ ...col, cells: [...col.cells] }));
-    
-        const rows = sortedColumns[0].cells.map((_, rowIndex) => sortedColumns.map((col) => col.cells[rowIndex]));
-    
-        rows.sort((rowA, rowB) => {
-            const cellA = rowA[columnIndex];
-            const cellB = rowB[columnIndex];
-    
-            if (column.sorting?.type === "numeric") {
-                const numA = parseFloat(cellA.cell_text.replace(/[^0-9.]/g, "")) || 0;
-                const numB = parseFloat(cellB.cell_text.replace(/[^0-9.]/g, "")) || 0;
-                return direction === "asc" ? numA - numB : numB - numA;
-            } else {
-                return direction === "asc"
-                    ? cellA.cell_text.localeCompare(cellB.cell_text)
-                    : cellB.cell_text.localeCompare(cellA.cell_text);
-            }
-        });
-    
-        sortedColumns.forEach((col, colIndex) => {
-            col.cells = rows.map((row) => row[colIndex]);
-        });
-    
-        setColumns(sortedColumns);
-        setSortConfig({ columnIndex, direction });
-    };
-
-    const calculateLeftPosition = (colIndex: number, isHeader: boolean = false) => {
-        if (!pinnedColumns.includes(colIndex)) return undefined;
-        
-        const pinnedIndex = pinnedColumns.indexOf(colIndex);
-        if (pinnedIndex === 0) return 0;
-        
-        let left = 0;
-        for (let i = 0; i < pinnedIndex; i++) {
-            const prevColIndex = pinnedColumns[i];
-            left += columnWidths[prevColIndex] || 0;
-        }
-        
-        return left;
-    };
-
-    const handleFilter = (columnIndex: number, selectedValues: string[]) => {
-    
-        const newColumns = initialColumns.map((col) => ({
-            ...col,
-            cells: [...col.cells],
-        }));
-    
-        const rowIndices = initialColumns[columnIndex].cells
-            .map((cell, index) => selectedValues.includes(cell.cell_text) ? index : null)
-            .filter((index): index is number => index !== null);
-    
-        newColumns.forEach((col, colIdx) => {
-            col.cells = rowIndices.map(rowIndex => initialColumns[colIdx].cells[rowIndex]);
-        });
-    
-        setColumns(newColumns);
-    };
-
     return (
         <div className="overflow-auto"
             style={{ maxWidth: '90%' }}>
@@ -165,7 +62,7 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                             const alignment = col.text_alignment || defaultAlignment;
                             const isPinned = pinnedColumns.includes(colIndex);
                             const width = columnWidths[colIndex] || 'auto';
-                            const left = calculateLeftPosition(colIndex);
+                            const left = calculateLeftPosition(colIndex, pinnedColumns, columnWidths);
                             const isSorted = sortConfig?.columnIndex === colIndex;
                             
                             return (
@@ -173,7 +70,7 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                     key={colIndex}
                                     onContextMenu={(e) => {
                                         e.preventDefault();
-                                        togglePinColumn(colIndex);
+                                        togglePinColumn(colIndex, setPinnedColumns);
                                     }}
                                     style={{
                                         backgroundColor: isPinned ? col.background_color || '#f8fafc' : col.background_color,
@@ -234,19 +131,19 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                         <ColumnFilter
                                             uniqueValues={data[colIndex] || []}
                                             activeSort={sortConfig?.columnIndex === colIndex ? sortConfig.direction : null}
-                                            onSortAsc={() => handleSort(colIndex, "asc")}
-                                            onSortDesc={() => handleSort(colIndex, "desc")}
+                                            onSortAsc={() => handleSort(colIndex, "asc", sortConfig, setSortConfig, setColumns, initialColumns, columns)}
+                                            onSortDesc={() => handleSort(colIndex, "desc", sortConfig, setSortConfig, setColumns, initialColumns, columns)}
                                             onClearSort={() => {
                                                 setColumns([...initialColumns]);
                                                 setSortConfig(null);
                                             }}
-                                            onFilterChange={(selected) => handleFilter(colIndex, selected)}
+                                            onFilterChange={(selected) => handleFilter(colIndex, selected, initialColumns, setColumns)}
                                             columns={initialColumns[colIndex]}
                                         />
 
                                 </div>
                                 <div
-                                    onMouseDown={(e) => handleMouseDown(e, colIndex)}
+                                    onMouseDown={(e) => handleMouseDown(e, colIndex, columnWidths, setColumnWidths)}
                                     style={{
                                         position: "absolute",
                                         top: 0,
@@ -280,7 +177,7 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                 const icon = cell?.icon ? iconMap[cell.icon.name] : null;
                                 const isPinned = pinnedColumns.includes(colIndex);
                                 const width = columnWidths[colIndex] || 'auto';
-                                const left = calculateLeftPosition(colIndex);
+                                const left = calculateLeftPosition(colIndex, pinnedColumns, columnWidths);
 
                                 return (
                                     <TableCell

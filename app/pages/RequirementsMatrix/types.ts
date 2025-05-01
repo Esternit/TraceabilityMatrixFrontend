@@ -41,3 +41,8 @@ export type Column = {
 export type Props = {
     columns: Column[];
 };
+
+export type SortConfig = {
+    columnIndex: number;
+    direction: "asc" | "desc";
+} | null;
