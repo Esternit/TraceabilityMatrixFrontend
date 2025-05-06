@@ -24,6 +24,8 @@ export type Cell = {
     text_color?: string;
     text_alignment?: TextAlignment;
     icon?: Icon;
+    parent_id?: string,
+    dependencies?: Cell[];
 };
 
 export type Column = {
@@ -46,3 +48,9 @@ export type SortConfig = {
     columnIndex: number;
     direction: "asc" | "desc";
 } | null;
+
+export type RequirementNode = {
+    id: string;
+    cell: Cell;
+    children: RequirementNode[];
+  };

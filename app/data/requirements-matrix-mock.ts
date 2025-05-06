@@ -20,15 +20,18 @@ export const mockData =
         },
         {
           "cell_text": "REQ-002",
-          "background_color": "#EBF5FB"
+          "background_color": "#EBF5FB",
+          "parent_id": "REQ-001"
         },
         {
           "cell_text": "REQ-003",
-          "background_color": "#EBF5FB"
+          "background_color": "#EBF5FB",
+          "parent_id": "REQ-002"
         },
         {
           "cell_text": "REQ-004",
-          "background_color": "#EBF5FB"
+          "background_color": "#EBF5FB",
+          "parent_id": "REQ-001"
         },
         {
           "cell_text": "REQ-005",

@@ -1,7 +1,8 @@
 import {
     useState,
     useEffect,
-    useRef
+    useRef,
+    useMemo
 } from "react";
 
 import {
@@ -9,15 +10,14 @@ import {
     TableHeader,
     TableRow,
     TableHead,
-    TableBody,
-    TableCell
 } from "@/components/ui/table";
 import { TextAlignment } from "./types";
 import { Pin } from "lucide-react";
-import { Column, Props } from "./types";
+import { Column, Props, RequirementNode } from "./types";
 import { iconMap } from "./iconMap";
 import { ColumnFilter } from "./ColumnFilter";
 import { handleSort, handleMouseDown, togglePinColumn, calculateLeftPosition, handleFilter } from "./utils";
+import {TableBodyOwn} from "./TableBodyOwn";
 
 export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const [filters, setFilters] = useState<Record<number, string[]>>({});
@@ -27,8 +27,39 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const [pinnedColumns, setPinnedColumns] = useState<number[]>([]);
     const [columnWidths, setColumnWidths] = useState<number[]>([]);
     const tableRef = useRef<HTMLTableElement>(null);
+    const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
     if (!columns.length) return null;
+
+    const requirementTree = useMemo<RequirementNode[]>(() => {
+        const cellMap = new Map<string, RequirementNode>();
+      
+        columns[0].cells.forEach((cell) => {
+          const id = cell.cell_text;
+          if (!id) return;
+      
+          cellMap.set(id, {
+            id,
+            cell,
+            children: [],
+          });
+        });
+
+        const roots: RequirementNode[] = [];
+      
+        cellMap.forEach((node) => {
+          const parentId = node.cell.parent_id;
+          if (parentId && cellMap.has(parentId)) {
+            const parent = cellMap.get(parentId)!;
+            parent.children.push(node);
+          } else {
+            roots.push(node);
+          }
+        });
+        console.log(roots);
+      
+        return roots;
+      }, [columns]);
 
     const defaultAlignment: TextAlignment = {
         vertical: "center",
@@ -159,108 +190,14 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                         })}
                     </TableRow>
                 </TableHeader>
-                <TableBody>
-                    {Array.from({ length: columns[0].cells.length })
-                        .filter((_, rowIndex) => {
-                            return columns.every((col, colIndex) => {
-                                const selected = filters[colIndex];
-                                if (!selected) return true;
-                                const cellValue = col.cells[rowIndex].cell_text;
-                                return selected.includes(cellValue);
-                            });
-                        })
-                    .map((_, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                            {columns.map((col, colIndex) => {
-                                const cell = col.cells[rowIndex];
-                                const align = cell?.text_alignment || col.text_alignment || defaultAlignment;
-                                const icon = cell?.icon ? iconMap[cell.icon.name] : null;
-                                const isPinned = pinnedColumns.includes(colIndex);
-                                const width = columnWidths[colIndex] || 'auto';
-                                const left = calculateLeftPosition(colIndex, pinnedColumns, columnWidths);
-
-                                return (
-                                    <TableCell
-                                    key={`${colIndex}-${rowIndex}`}
-                                    style={{
-                                        backgroundColor: isPinned 
-                                            ? cell?.background_color || '#f8fafc' 
-                                            : cell?.background_color || "transparent",
-                                        color: cell?.text_color || "inherit",
-                                        textAlign: align.horizontal,
-                                        verticalAlign: align.vertical,
-                                        position: isPinned ? 'sticky' : undefined,
-                                        left: left !== undefined ? `${left}px` : undefined,
-                                        zIndex: isPinned ? 20 : 1,
-                                        boxShadow: isPinned ? '5px 0 5px -5px rgba(0,0,0,0.2)' : undefined,
-                                        minWidth: `${width}px`,
-                                        width: `${width}px`,
-                                        maxWidth: "300px",
-                                        whiteSpace: 'normal',
-                                        padding: '0.5rem',
-                                        overflow: 'hidden', 
-                                    }}
-                                    >
-                                    <div
-                                        style={{
-                                        display: "flex",
-                                        alignItems:
-                                            align.vertical === "top"
-                                            ? "flex-start"
-                                            : align.vertical === "bottom"
-                                            ? "flex-end"
-                                            : "center",
-                                        justifyContent:
-                                            align.horizontal === "left"
-                                            ? "flex-start"
-                                            : align.horizontal === "right"
-                                            ? "flex-end"
-                                            : "center",
-                                        gap: "0.5rem",
-                                        width: '100%',
-                                        }}
-                                    >
-                                        {cell?.icon?.position === "left" && icon}
-
-                                        {cell?.cell_text?.startsWith("http") ? (
-                                        <a
-                                            href={cell.cell_text}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                            color: 'inherit',
-                                            textDecoration: 'underline',
-                                            display: 'inline-block',
-                                            overflow: columnWidths[colIndex] < 100 ? 'hidden' : 'visible',
-                                            textOverflow: columnWidths[colIndex] < 100 ? 'ellipsis' : 'unset',
-                                            whiteSpace: columnWidths[colIndex] < 100 ? 'nowrap' : 'normal',
-                                            width: '100%',
-                                            }}
-                                        >
-                                            {cell.cell_text}
-                                        </a>
-                                        ) : (
-                                        <span
-                                            style={{
-                                            display: 'inline-block',
-                                            overflow: columnWidths[colIndex] < 100 ? 'hidden' : 'visible',
-                                            textOverflow: columnWidths[colIndex] < 100 ? 'ellipsis' : 'unset',
-                                            whiteSpace: columnWidths[colIndex] < 100 ? 'nowrap' : 'normal',
-                                            width: '100%',
-                                            }}
-                                        >
-                                            {cell?.cell_text}
-                                        </span>
-                                        )}
-
-                                        {cell?.icon?.position === "right" && icon}
-                                    </div>
-                                    </TableCell>
-                                );
-                            })}
-                        </TableRow>
-                    ))}
-                </TableBody>
+                <TableBodyOwn 
+                    columns = {columns}
+                    filters={filters}
+                    defaultAlignment = {defaultAlignment}
+                    iconMap = {iconMap}
+                    pinnedColumns={pinnedColumns}
+                    columnWidths={columnWidths}
+                 />
             </Table>
         </div>
     );
