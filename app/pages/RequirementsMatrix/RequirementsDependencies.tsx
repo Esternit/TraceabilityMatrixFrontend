@@ -1,7 +1,8 @@
 import ReactFlow, { Background, Controls, MiniMap, useEdgesState, useNodesState, Position, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Column } from './types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const nodeWidth = 250;
 const nodeHeight = 80;
@@ -24,9 +25,19 @@ interface RequirementsDependenciesProps {
     columns: Column[];
 }
 
-function NodeCard(id: string, title: string, status: string, color: string) {
+interface NodeData {
+    id: string;
+    title: string;
+    status: string;
+    color: string;
+}
+
+function NodeCard({ id, title, status, color, onNodeClick }: NodeData & { onNodeClick: () => void }) {
     return (
-        <div className="w-full h-full p-2 flex flex-col justify-between">
+        <div 
+            className="w-full h-full p-2 flex flex-col justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={onNodeClick}
+        >
             <div className="font-bold truncate">{id}</div>
             <div className="text-sm text-gray-600 truncate">{title}</div>
             <div className="text-xs text-gray-500 truncate">{status}</div>
@@ -35,6 +46,8 @@ function NodeCard(id: string, title: string, status: string, color: string) {
 }
 
 export const RequirementsDependencies = ({ columns }: RequirementsDependenciesProps) => {
+    const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+
     const { nodes, edges } = useMemo(() => {
         const nodes: any[] = [];
         const edges: Edge[] = [];
@@ -61,12 +74,9 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
             }
         });
 
-        console.log('Root nodes:', Array.from(rootNodes));
-
         Array.from(rootNodes).forEach((rootId, index) => {
             const color = edgeColors[index % edgeColors.length];
             nodeColors.set(rootId, color);
-            console.log(`Root node ${rootId} gets color ${color}`);
         });
 
         const determineLevels = () => {
@@ -114,7 +124,15 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
             nodes.push({
                 id,
                 data: {
-                    label: NodeCard(id, title, status, cell.background_color || '#ffffff'),
+                    label: (
+                        <NodeCard
+                            id={id}
+                            title={title}
+                            status={status}
+                            color={cell.background_color || '#ffffff'}
+                            onNodeClick={() => setSelectedNode({ id, title, status, color: cell.background_color || '#ffffff' })}
+                        />
+                    ),
                     level
                 },
                 position: { x, y },
@@ -151,8 +169,6 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
                     break;
                 }
             }
-
-            console.log(`Creating edge from ${cell.parent_id} to ${id} with color ${edgeColor || '#94a3b8'}`);
 
             edges.push({
                 id: `edge-${cell.parent_id}-${id}`,
@@ -197,6 +213,24 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
                 <Controls />
                 <MiniMap />
             </ReactFlow>
+
+            <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{selectedNode?.id}</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4 space-y-4">
+                        <div>
+                            <h3 className="font-semibold text-gray-700">Название</h3>
+                            <p className="text-gray-600">{selectedNode?.title}</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-700">Статус</h3>
+                            <p className="text-gray-600">{selectedNode?.status}</p>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
