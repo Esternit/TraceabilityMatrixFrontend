@@ -1,10 +1,5 @@
 "use client";
 
-import Requirement from "../classes/Requirement";
-import RequirementForm from "./RequirementForm";
-import RequirementsList from "./RequirementsList";
-import RequirementsTree from "./RequirementsTree";
-import TableDemo from "./TableDemo";
 import { useState } from "react";
 import { SourceRequirementMatrix } from "./SourceRequirementMatrix";
 import { RequirementsMatrix } from "./RequirementsMatrix/RequirementsMatrix";
@@ -12,6 +7,9 @@ import { mockData } from "@/app/data/requirements-matrix-mock";
 import { mockDataTree } from "../data/requirements-tree";
 import { RequirementsChart } from "./RequirementsChart";
 import RequirementsMindMap from "./RequirementsMindMap";
+import RequirementsHeatmap from "./Charts/RequirementsHeatmap";
+import RequirementsStatusPie from "./Charts/RequirementsStatusPie";
+import { DynamicBarChart } from "./Charts/DynamicBarChart";
 
 export function RequirementsApp() {
   const [requirements, setRequirements] = useState([]);
@@ -41,6 +39,8 @@ export function RequirementsApp() {
       <SourceRequirementMatrix requirements={requirements} /> */}
       {/* <RequirementsTree requirements={requirements} /> */}
       <RequirementsMatrix columns={mockData} />
+      {/* <RequirementsStatusPie statusColumn={mockData[2]} /> */}
+      {/* <DynamicBarChart columns={mockData} /> */}
       {/* <RequirementsMindMap requirementsData={mockDataTree} /> */}
       {/* <RequirementsChart columns={mockData} /> */}
     </div>
