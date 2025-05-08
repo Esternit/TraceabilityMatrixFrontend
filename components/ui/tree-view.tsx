@@ -5,9 +5,11 @@ import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronRight } from 'lucide-react'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import { IconName } from '@/app/pages/RequirementsMatrix/types'
+import { iconMap } from '@/app/pages/RequirementsMatrix/iconMap'
 
 const treeVariants = cva(
-    'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10'
+    'group hover:before:opacity-100 before:absolute before:rounded-lg before:left-0 px-2 before:w-full before:opacity-0 before:bg-accent/70 before:h-[2rem] before:-z-10 transition-all duration-200'
 )
 
 const selectedTreeVariants = cva(
@@ -21,14 +23,15 @@ const dragOverVariants = cva(
 interface TreeDataItem {
     id: string
     name: string
-    icon?: any
-    selectedIcon?: any
-    openIcon?: any
+    icon?: IconName
+    selectedIcon?: IconName
+    openIcon?: IconName
     children?: TreeDataItem[]
     actions?: React.ReactNode
     onClick?: () => void
     draggable?: boolean
     droppable?: boolean
+    status?: 'success' | 'warning' | 'error' | 'info' | 'default'
 }
 
 type TreeProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -447,21 +450,32 @@ const TreeIcon = ({
     item: TreeDataItem
     isOpen?: boolean
     isSelected?: boolean
-    default?: any
+    default?: IconName
 }) => {
-    let Icon = defaultIcon
+    let iconName: IconName = defaultIcon || 'file'
+    
     if (isSelected && item.selectedIcon) {
-        Icon = item.selectedIcon
+        iconName = item.selectedIcon
     } else if (isOpen && item.openIcon) {
-        Icon = item.openIcon
+        iconName = item.openIcon
     } else if (item.icon) {
-        Icon = item.icon
+        iconName = item.icon
     }
+
+    // If item has children, use folder icons
+    if (item.children?.length) {
+        iconName = isOpen ? 'folder-open' : 'folder'
+    }
+
+    const Icon = iconMap[iconName]
     return Icon ? (
-        <Icon className="h-4 w-4 shrink-0 mr-2" />
-    ) : (
-        <></>
-    )
+        <div className={cn(
+            "transition-transform duration-200",
+            isOpen && "transform rotate-90"
+        )}>
+            {Icon}
+        </div>
+    ) : null
 }
 
 const TreeActions = ({
@@ -474,8 +488,8 @@ const TreeActions = ({
     return (
         <div
             className={cn(
-                isSelected ? 'block' : 'hidden',
-                'absolute right-3 group-hover:block'
+                'absolute right-3 opacity-0 transition-opacity duration-200',
+                isSelected ? 'opacity-100' : 'group-hover:opacity-100'
             )}
         >
             {children}

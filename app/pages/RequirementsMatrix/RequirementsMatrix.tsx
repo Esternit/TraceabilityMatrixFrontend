@@ -148,15 +148,6 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                                                 </div>
                                             )}
 
-                                            {sortConfig?.columnIndex === colIndex && (
-                                                <div className="flex-shrink-0 ml-1">
-                                                    {sortConfig.direction === "asc" ? (
-                                                        <div className="w-1.5 h-1.5 border-t-2 border-r-2 transform rotate-[-45deg] text-current" />
-                                                    ) : sortConfig.direction === "desc" ? (
-                                                        <div className="w-1.5 h-1.5 border-b-2 border-r-2 transform rotate-[45deg] text-current" />
-                                                    ) : null}
-                                                </div>
-                                            )}
                                         </div>
 
                                         <ColumnFilter
@@ -191,13 +182,17 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                     </TableRow>
                 </TableHeader>
                 <TableBodyOwn 
-                    columns = {columns}
+                    columns={columns}
                     filters={filters}
-                    defaultAlignment = {defaultAlignment}
-                    iconMap = {iconMap}
+                    defaultAlignment={defaultAlignment}
+                    iconMap={iconMap}
                     pinnedColumns={pinnedColumns}
                     columnWidths={columnWidths}
-                 />
+                    sortConfig={sortConfig}
+                    setSortConfig={setSortConfig}
+                    setColumns={setColumns}
+                    initialColumns={initialColumns}
+                />
             </Table>
         </div>
     );

@@ -57,48 +57,73 @@ export const togglePinColumn = (
 
 export const handleSort = (
     columnIndex: number,
-    direction: "asc" | "desc", 
-    sortConfig: SortConfig, 
-    setSortConfig: React.Dispatch<React.SetStateAction<SortConfig>>,
-    setColumns: React.Dispatch<React.SetStateAction<Column[]>>,
+    direction: "asc" | "desc",
+    sortConfig: { columnIndex: number; direction: "asc" | "desc" } | null,
+    setSortConfig: (config: { columnIndex: number; direction: "asc" | "desc" } | null) => void,
+    setColumns: (columns: Column[]) => void,
     initialColumns: Column[],
-    columns: Column[]
-
+    currentColumns: Column[],
+    nodeId?: string
 ) => {
-    if (sortConfig && sortConfig.columnIndex === columnIndex && sortConfig.direction === direction) {
-        setColumns([...initialColumns]);
-        setSortConfig(null);
-        return;
-    }
-
-    const column = columns[columnIndex];
-    if (!column.sorting?.enabled) return;
-
-    const sortedColumns = columns.map((col) => ({ ...col, cells: [...col.cells] }));
-
-    const rows = sortedColumns[0].cells.map((_, rowIndex) => sortedColumns.map((col) => col.cells[rowIndex]));
-
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA[columnIndex];
-        const cellB = rowB[columnIndex];
-
-        if (column.sorting?.type === "numeric") {
-            const numA = parseFloat(cellA.cell_text.replace(/[^0-9.]/g, "")) || 0;
-            const numB = parseFloat(cellB.cell_text.replace(/[^0-9.]/g, "")) || 0;
-            return direction === "asc" ? numA - numB : numB - numA;
-        } else {
-            return direction === "asc"
-                ? cellA.cell_text.localeCompare(cellB.cell_text)
-                : cellB.cell_text.localeCompare(cellA.cell_text);
-        }
-    });
-
-    sortedColumns.forEach((col, colIndex) => {
-        col.cells = rows.map((row) => row[colIndex]);
-    });
-
-    setColumns(sortedColumns);
     setSortConfig({ columnIndex, direction });
+
+    const sortChildren = (cells: any[], parentId?: string) => {
+        const cellMap = new Map<string, any[]>();
+        const rootCells: any[] = [];
+
+        cells.forEach(cell => {
+            if (cell.parent_id) {
+                if (!cellMap.has(cell.parent_id)) {
+                    cellMap.set(cell.parent_id, []);
+                }
+                cellMap.get(cell.parent_id)!.push(cell);
+            } else {
+                rootCells.push(cell);
+            }
+        });
+
+        const sortedRootCells = [...rootCells].sort((a, b) => {
+            const valueA = a.cell_text || '';
+            const valueB = b.cell_text || '';
+            return direction === 'asc' 
+                ? valueA.localeCompare(valueB)
+                : valueB.localeCompare(valueA);
+        });
+
+        if (nodeId && cellMap.has(nodeId)) {
+            const children = cellMap.get(nodeId)!;
+            const sortedChildren = [...children].sort((a, b) => {
+                const valueA = a.cell_text || '';
+                const valueB = b.cell_text || '';
+                return direction === 'asc' 
+                    ? valueA.localeCompare(valueB)
+                    : valueB.localeCompare(valueA);
+            });
+            cellMap.set(nodeId, sortedChildren);
+        }
+
+        const result: any[] = [];
+        const processCell = (cell: any) => {
+            result.push(cell);
+            const children = cellMap.get(cell.cell_text) || [];
+            children.forEach(processCell);
+        };
+        sortedRootCells.forEach(processCell);
+
+        return result;
+    };
+
+    const newColumns = currentColumns.map((col, index) => {
+        if (index === columnIndex) {
+            return {
+                ...col,
+                cells: sortChildren(col.cells, nodeId)
+            };
+        }
+        return col;
+    });
+
+    setColumns(newColumns);
 };
 
 export const calculateLeftPosition = (

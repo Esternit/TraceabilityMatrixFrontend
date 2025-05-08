@@ -30,7 +30,6 @@ export const ColumnFilter = ({
   onClearSort,
   onFilterChange,
   columns,
-  
 }: Props) => {
   const [selectedValues, setSelectedValues] = useState<string[]>(uniqueValues);
   const [displayedValues, setDisplayedValues] = useState<string[]>(uniqueValues);
@@ -45,10 +44,9 @@ export const ColumnFilter = ({
         : [...selectedValues, value];
     onFilterChange(newSelected);
     setSelectedValues(newSelected);
-};
+  };
 
   useEffect(() => {
-
     setDisplayedValues(uniqueValues);
     setSelectedValues(uniqueValues);
   }, [uniqueValues]); 
@@ -96,132 +94,143 @@ export const ColumnFilter = ({
   const uniqueColors = Array.from(new Set(columns.cells.map((col) => col.background_color))).filter(Boolean);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white/70">
-          <Filter className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
+    <div className="flex items-center gap-1">
+      {activeSort && (
+        <div className="flex-shrink-0">
+          {activeSort === "asc" ? (
+            <ChevronUp className="h-4 w-4 text-white/70" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-white/70" />
+          )}
+        </div>
+      )}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon" className="text-white/70">
+            <Filter className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
 
-      <PopoverContent className="w-80 p-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-2">
-              <Button
-                variant={activeSort === "asc" ? "default" : "outline"}
-                size="sm"
-                className="flex-1 flex items-center justify-center gap-2"
-                onClick={onSortAsc}
+        <PopoverContent className="w-80 p-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <Button
+                  variant={activeSort === "asc" ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1 flex items-center justify-center gap-2"
+                  onClick={() => activeSort === "asc" ? onClearSort() : onSortAsc()}
+                >
+                  <ChevronUp className="h-4 w-4" /> Возрастание
+                </Button>
+                <Button
+                  variant={activeSort === "desc" ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1 flex items-center justify-center gap-2"
+                  onClick={() => activeSort === "desc" ? onClearSort() : onSortDesc()}
+                >
+                  <ChevronDown className="h-4 w-4" /> Убывание
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as FilterType)}
+                className="border rounded p-2 text-sm"
               >
-                <ChevronUp className="h-4 w-4" /> Возрастание
-              </Button>
-              <Button
-                variant={activeSort === "desc" ? "default" : "outline"}
-                size="sm"
-                className="flex-1 flex items-center justify-center gap-2"
-                onClick={onSortDesc}
-              >
-                <ChevronDown className="h-4 w-4" /> Убывание
-              </Button>
+                <option value="none">Без фильтра</option>
+                <option value="contains">Содержит</option>
+                <option value="equals">Равно</option>
+                <option value="not-equals">Не равно</option>
+                <option value="greater">Больше</option>
+                <option value="less">Меньше</option>
+                <option value="greater-equal">Больше или равно</option>
+                <option value="less-equal">Меньше или равно</option>
+                <option value="between">Между</option>
+                <option value="color-fill">По цвету</option>
+              </select>
+
+              {filterType === "color-fill" && (
+                <div className="mt-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full">
+                        {selectedColor ? `Выбран цвет: ${selectedColor}` : "Выберите цвет"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <div className="flex flex-wrap gap-2">
+                        {uniqueColors.map((color, index) => (
+                          <Button
+                            key={index}
+                            style={{ backgroundColor: color }}
+                            className="w-8 h-8 rounded-full"
+                            onClick={() => setSelectedColor(color || "")}
+                          />
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+
+              {filterType !== "none" && filterType !== "between" && filterType !== "color-fill" && (
+                <Input
+                  placeholder="Введите значение..."
+                  value={filterValue}
+                  onChange={(e) => setFilterValue(e.target.value)}
+                  className="text-sm"
+                />
+              )}
+
+              {filterType === "between" && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="От"
+                    value={filterRange.from}
+                    onChange={(e) => setFilterRange((prev) => ({ ...prev, from: e.target.value }))}
+                    className="text-sm"
+                  />
+                  <Input
+                    placeholder="До"
+                    value={filterRange.to}
+                    onChange={(e) => setFilterRange((prev) => ({ ...prev, to: e.target.value }))}
+                    className="text-sm"
+                  />
+                </div>
+              )}
+
+              {filterType !== "none" && (
+                <div className="flex gap-2">
+                  <Button variant="default" size="sm" className="flex-1" onClick={applyAdvancedFilter}>
+                    Применить
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={resetFilter}>
+                    Сбросить
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="max-h-60 overflow-y-auto flex flex-col gap-2">
+              {displayedValues.map((value, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedValues.includes(value)}
+                    onCheckedChange={() => toggleValue(value)}
+                    id={`filter-${index}`}
+                  />
+                  <label htmlFor={`filter-${index}`} className="text-sm break-words">
+                    {value || "(пусто)"}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="flex flex-col gap-2">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as FilterType)}
-              className="border rounded p-2 text-sm"
-            >
-              <option value="none">Без фильтра</option>
-              <option value="contains">Содержит</option>
-              <option value="equals">Равно</option>
-              <option value="not-equals">Не равно</option>
-              <option value="greater">Больше</option>
-              <option value="less">Меньше</option>
-              <option value="greater-equal">Больше или равно</option>
-              <option value="less-equal">Меньше или равно</option>
-              <option value="between">Между</option>
-              <option value="color-fill">По цвету</option>
-            </select>
-
-            {filterType === "color-fill" && (
-              <div className="mt-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="w-full">
-                      {selectedColor ? `Выбран цвет: ${selectedColor}` : "Выберите цвет"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <div className="flex flex-wrap gap-2">
-                      {uniqueColors.map((color, index) => (
-                        <Button
-                          key={index}
-                          style={{ backgroundColor: color }}
-                          className="w-8 h-8 rounded-full"
-                          onClick={() => setSelectedColor(color || "")}
-                        />
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
-
-            {filterType !== "none" && filterType !== "between" && filterType !== "color-fill" && (
-              <Input
-                placeholder="Введите значение..."
-                value={filterValue}
-                onChange={(e) => setFilterValue(e.target.value)}
-                className="text-sm"
-              />
-            )}
-
-            {filterType === "between" && (
-              <div className="flex gap-2">
-                <Input
-                  placeholder="От"
-                  value={filterRange.from}
-                  onChange={(e) => setFilterRange((prev) => ({ ...prev, from: e.target.value }))}
-                  className="text-sm"
-                />
-                <Input
-                  placeholder="До"
-                  value={filterRange.to}
-                  onChange={(e) => setFilterRange((prev) => ({ ...prev, to: e.target.value }))}
-                  className="text-sm"
-                />
-              </div>
-            )}
-
-            {filterType !== "none" && (
-              <div className="flex gap-2">
-                <Button variant="default" size="sm" className="flex-1" onClick={applyAdvancedFilter}>
-                  Применить
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1" onClick={resetFilter}>
-                  Сбросить
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="max-h-60 overflow-y-auto flex flex-col gap-2">
-            {displayedValues.map((value, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Checkbox
-                  checked={selectedValues.includes(value)}
-                  onCheckedChange={() => toggleValue(value)}
-                  id={`filter-${index}`}
-                />
-                <label htmlFor={`filter-${index}`} className="text-sm break-words">
-                  {value || "(пусто)"}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
