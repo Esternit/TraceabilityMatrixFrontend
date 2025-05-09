@@ -205,3 +205,5 @@ export const RequirementsMatrix = forwardRef(({
         </div>
     );
 });
+
+RequirementsMatrix.displayName = 'RequirementsMatrix';
