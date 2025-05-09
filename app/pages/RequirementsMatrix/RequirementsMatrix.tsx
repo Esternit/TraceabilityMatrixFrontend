@@ -2,7 +2,8 @@ import {
     useState,
     useEffect,
     useRef,
-    useMemo
+    useMemo,
+    forwardRef
 } from "react";
 
 import {
@@ -19,7 +20,14 @@ import { ColumnFilter } from "./ColumnFilter";
 import { handleSort, handleMouseDown, togglePinColumn, calculateLeftPosition, handleFilter } from "./utils";
 import {TableBodyOwn} from "./TableBodyOwn";
 
-export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
+export const RequirementsMatrix = forwardRef(({ 
+    columns: initialColumns, 
+    expandedIds = new Set(),
+    onExpandedIdsChange
+}: Props & { 
+    expandedIds?: Set<string>;
+    onExpandedIdsChange?: (ids: Set<string>) => void;
+}, ref) => {
     const [filters, setFilters] = useState<Record<number, string[]>>({});
     const [data, setData] = useState<{ [key: number]: string[] }>({});
     const [columns, setColumns] = useState<Column[]>(initialColumns);
@@ -27,7 +35,6 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
     const [pinnedColumns, setPinnedColumns] = useState<number[]>([]);
     const [columnWidths, setColumnWidths] = useState<number[]>([]);
     const tableRef = useRef<HTMLTableElement>(null);
-    const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
     if (!columns.length) return null;
 
@@ -56,10 +63,9 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
             roots.push(node);
           }
         });
-        console.log(roots);
       
         return roots;
-      }, [columns]);
+    }, [columns]);
 
     const defaultAlignment: TextAlignment = {
         vertical: "center",
@@ -72,7 +78,7 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
           uniqueValuesMap[colIndex] = [...new Set(col.cells.map(cell => cell.cell_text))];
         });
         setData(uniqueValuesMap);
-      }, [initialColumns]);
+    }, [initialColumns]);
 
     useEffect(() => {
         if (tableRef.current) {
@@ -192,8 +198,10 @@ export const RequirementsMatrix = ({ columns: initialColumns }: Props) => {
                     setSortConfig={setSortConfig}
                     setColumns={setColumns}
                     initialColumns={initialColumns}
+                    expandedIds={expandedIds}
+                    onExpandedIdsChange={onExpandedIdsChange}
                 />
             </Table>
         </div>
     );
-};
+});

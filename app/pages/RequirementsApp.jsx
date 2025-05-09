@@ -5,8 +5,29 @@ import { mockData } from "@/app/data/requirements-matrix-mock";
 import { RequirementsDependencies } from "./RequirementsMatrix/RequirementsDependencies";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockDependenciesData } from "../data/requirements-dependencies-mock";
+import { useRef, useState } from "react";
 
-export function RequirementsApp() {
+export default function RequirementsApp() {
+  const [activeTab, setActiveTab] = useState("table");
+  const tableRef = useRef(null);
+  const [expandedIds, setExpandedIds] = useState(new Set());
+
+  const handleRequirementClick = (id, expandedNodes) => {
+    setActiveTab("table");
+    setExpandedIds(new Set(expandedNodes));
+
+    setTimeout(() => {
+      const element = document.querySelector(`[data-requirement-id="${id}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.classList.add("highlight-row");
+        setTimeout(() => {
+          element.classList.remove("highlight-row");
+        }, 2000);
+      }
+    }, 100);
+  };
+
   return (
     <div
       style={{
@@ -17,7 +38,7 @@ export function RequirementsApp() {
         gap: "5rem",
       }}
     >
-      <Tabs defaultValue="table" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="table">Таблица</TabsTrigger>
           <TabsTrigger value="dependencies">Зависимости</TabsTrigger>
@@ -26,17 +47,26 @@ export function RequirementsApp() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="table">
-          <RequirementsMatrix columns={mockData} />
+          <RequirementsMatrix
+            columns={mockData}
+            ref={tableRef}
+            expandedIds={expandedIds}
+            onExpandedIdsChange={setExpandedIds}
+          />
         </TabsContent>
         <TabsContent value="dependencies">
-          <RequirementsDependencies columns={mockData} />
+          <RequirementsDependencies
+            columns={mockData}
+            onRequirementClick={handleRequirementClick}
+          />
         </TabsContent>
         <TabsContent value="dependencies-more">
-          <RequirementsDependencies columns={mockDependenciesData} />
+          <RequirementsDependencies
+            columns={mockDependenciesData}
+            onRequirementClick={handleRequirementClick}
+          />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
-
-export default RequirementsApp;

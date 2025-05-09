@@ -1,14 +1,12 @@
 import ReactFlow, { Background, Controls, MiniMap, useEdgesState, useNodesState, Position, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Column } from './types';
-import { useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useMemo } from 'react';
 
 const nodeWidth = 250;
-const nodeHeight = 80;
+const nodeHeight = 100;
 const horizontalSpacing = 350;
 const verticalSpacing = 150;
-
 
 const edgeColors = [
     '#2E86C1',
@@ -23,6 +21,7 @@ const edgeColors = [
 
 interface RequirementsDependenciesProps {
     columns: Column[];
+    onRequirementClick?: (id: string, expandedNodes?: string[]) => void;
 }
 
 interface NodeData {
@@ -30,24 +29,23 @@ interface NodeData {
     title: string;
     status: string;
     color: string;
+    description?: string;
 }
 
-function NodeCard({ id, title, status, color, onNodeClick }: NodeData & { onNodeClick: () => void }) {
+function NodeCard({ id, title, status, color, description, onNodeClick }: NodeData & { onNodeClick: () => void }) {
     return (
         <div 
             className="w-full h-full p-2 flex flex-col justify-between cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={onNodeClick}
         >
             <div className="font-bold truncate">{id}</div>
-            <div className="text-sm text-gray-600 truncate">{title}</div>
+            <div className="text-sm text-gray-600 line-clamp-3">{title}</div>
             <div className="text-xs text-gray-500 truncate">{status}</div>
         </div>
     );
 }
 
-export const RequirementsDependencies = ({ columns }: RequirementsDependenciesProps) => {
-    const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
-
+export const RequirementsDependencies = ({ columns, onRequirementClick }: RequirementsDependenciesProps) => {
     const { nodes, edges } = useMemo(() => {
         const nodes: any[] = [];
         const edges: Edge[] = [];
@@ -56,6 +54,7 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
         const rootNodes = new Set<string>();
         const nodeColors = new Map<string, string>();
         const childrenByParent = new Map<string, string[]>();
+        const nodeToParent = new Map<string, string>();
 
         columns[0].cells.forEach((cell) => {
             const id = cell.cell_text;
@@ -65,6 +64,7 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
                 const children = childrenByParent.get(cell.parent_id) || [];
                 children.push(id);
                 childrenByParent.set(cell.parent_id, children);
+                nodeToParent.set(id, cell.parent_id);
             }
         });
 
@@ -113,6 +113,7 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
 
             const title = columns[1].cells[index].cell_text;
             const status = columns[2].cells[index].cell_text;
+            const description = columns[3]?.cells[index]?.cell_text;
             const level = nodeLevels.get(id) || 0;
 
             const currentCount = nodesOnLevel.get(level) || 0;
@@ -129,8 +130,23 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
                             id={id}
                             title={title}
                             status={status}
+                            description={description}
                             color={cell.background_color || '#ffffff'}
-                            onNodeClick={() => setSelectedNode({ id, title, status, color: cell.background_color || '#ffffff' })}
+                            onNodeClick={() => {
+                                if (onRequirementClick) {
+                                    const expandedNodes = new Set<string>();
+                                    let currentId = id;
+                                    
+                                    // Собираем только родительские узлы
+                                    while (currentId && nodeToParent.has(currentId)) {
+                                        const parentId = nodeToParent.get(currentId)!;
+                                        expandedNodes.add(parentId);
+                                        currentId = parentId;
+                                    }
+                                    
+                                    onRequirementClick(id, Array.from(expandedNodes));
+                                }
+                            }}
                         />
                     ),
                     level
@@ -189,7 +205,7 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
         });
 
         return { nodes, edges };
-    }, [columns]);
+    }, [columns, onRequirementClick]);
 
     const [nodesState, setNodes, onNodesChange] = useNodesState(nodes);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState(edges);
@@ -213,24 +229,6 @@ export const RequirementsDependencies = ({ columns }: RequirementsDependenciesPr
                 <Controls />
                 <MiniMap />
             </ReactFlow>
-
-            <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{selectedNode?.id}</DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-4 space-y-4">
-                        <div>
-                            <h3 className="font-semibold text-gray-700">Название</h3>
-                            <p className="text-gray-600">{selectedNode?.title}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-700">Статус</h3>
-                            <p className="text-gray-600">{selectedNode?.status}</p>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };

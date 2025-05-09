@@ -3,7 +3,7 @@ import { TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { Column, TextAlignment, IconName } from './types';
 import { ReactNode } from "react";
 import { calculateLeftPosition } from './utils';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 
@@ -18,6 +18,8 @@ type TableBodyOwnProps = {
     setSortConfig: (config: { columnIndex: number; direction: "asc" | "desc" } | null) => void;
     setColumns: (columns: Column[]) => void;
     initialColumns: Column[];
+    expandedIds?: Set<string>;
+    onExpandedIdsChange?: (ids: Set<string>) => void;
 };
 
 type TreeNode = {
@@ -37,9 +39,19 @@ export const TableBodyOwn = ({
     sortConfig,
     setSortConfig,
     setColumns,
-    initialColumns
+    initialColumns,
+    expandedIds = new Set(),
+    onExpandedIdsChange
 }: TableBodyOwnProps) => {
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        const newExpanded: Record<string, boolean> = {};
+        expandedIds.forEach(id => {
+            newExpanded[id] = true;
+        });
+        setExpanded(newExpanded);
+    }, [expandedIds]);
 
     const tree = useMemo(() => {
         const nodes: Record<string, TreeNode> = {};
@@ -65,7 +77,18 @@ export const TableBodyOwn = ({
     }, [columns]);
 
     const toggleExpand = (id: string) => {
-        setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+        const newExpanded = { ...expanded, [id]: !expanded[id] };
+        setExpanded(newExpanded);
+        
+        if (onExpandedIdsChange) {
+            const newExpandedIds = new Set(expandedIds);
+            if (newExpanded[id]) {
+                newExpandedIds.add(id);
+            } else {
+                newExpandedIds.delete(id);
+            }
+            onExpandedIdsChange(newExpandedIds);
+        }
     };
 
     const renderRow = (node: TreeNode, level = 0): React.ReactNode => {
@@ -208,7 +231,12 @@ export const TableBodyOwn = ({
 
         return (
             <React.Fragment key={node.id}>
-                <TableRow>{row}</TableRow>
+                <TableRow 
+                    data-requirement-id={node.id}
+                    className="transition-colors duration-200"
+                >
+                    {row}
+                </TableRow>
                 {expanded[node.id] &&
                     node.children.map(child => renderRow(child, level + 1))}
             </React.Fragment>
