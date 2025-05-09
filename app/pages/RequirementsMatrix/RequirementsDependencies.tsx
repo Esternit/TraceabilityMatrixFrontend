@@ -30,13 +30,28 @@ interface NodeData {
     status: string;
     color: string;
     description?: string;
+    githubCommit?: string;
 }
 
-function NodeCard({ id, title, status, color, description, onNodeClick }: NodeData & { onNodeClick: () => void }) {
+function NodeCard({ id, title, status, color, description, githubCommit, onNodeClick }: NodeData & { onNodeClick: () => void }) {
+    const handleClick = (e: React.MouseEvent) => {
+        if (e.button === 0) { // Left click
+            if (githubCommit && githubCommit !== '-') {
+                window.open(githubCommit, '_blank');
+            }
+        }
+    };
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onNodeClick();
+    };
+
     return (
         <div 
             className="w-full h-full p-2 flex flex-col justify-between cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={onNodeClick}
+            onClick={handleClick}
+            onContextMenu={handleContextMenu}
         >
             <div className="font-bold truncate">{id}</div>
             <div className="text-sm text-gray-600 line-clamp-3">{title}</div>
@@ -114,6 +129,7 @@ export const RequirementsDependencies = ({ columns, onRequirementClick }: Requir
             const title = columns[1].cells[index].cell_text;
             const status = columns[2].cells[index].cell_text;
             const description = columns[3]?.cells[index]?.cell_text;
+            const githubCommit = columns[3]?.cells[index]?.cell_text;
             const level = nodeLevels.get(id) || 0;
 
             const currentCount = nodesOnLevel.get(level) || 0;
@@ -131,13 +147,13 @@ export const RequirementsDependencies = ({ columns, onRequirementClick }: Requir
                             title={title}
                             status={status}
                             description={description}
+                            githubCommit={githubCommit}
                             color={cell.background_color || '#ffffff'}
                             onNodeClick={() => {
                                 if (onRequirementClick) {
                                     const expandedNodes = new Set<string>();
                                     let currentId = id;
                                     
-                                    // Собираем только родительские узлы
                                     while (currentId && nodeToParent.has(currentId)) {
                                         const parentId = nodeToParent.get(currentId)!;
                                         expandedNodes.add(parentId);
