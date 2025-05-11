@@ -6,6 +6,7 @@ import { RequirementsDependencies } from "./RequirementsMatrix/RequirementsDepen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockDependenciesData } from "../data/requirements-dependencies-mock";
 import { useRef, useState } from "react";
+import ChartBuilder from "./ChartBuilder/ChartBuilder";
 
 export default function RequirementsApp() {
   const [activeTab, setActiveTab] = useState("table");
@@ -45,6 +46,7 @@ export default function RequirementsApp() {
           <TabsTrigger value="dependencies-more">
             Зависимости (много)
           </TabsTrigger>
+          <TabsTrigger value="charts">Графики</TabsTrigger>
         </TabsList>
         <TabsContent value="table">
           <RequirementsMatrix
@@ -65,6 +67,9 @@ export default function RequirementsApp() {
             columns={mockDependenciesData}
             onRequirementClick={handleRequirementClick}
           />
+        </TabsContent>
+        <TabsContent value="charts">
+          <ChartBuilder />
         </TabsContent>
       </Tabs>
     </div>
