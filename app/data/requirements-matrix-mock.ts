@@ -387,5 +387,200 @@ export const mockData =
           "text_color": "#FFFFFF"
         },
       ]
+    },
+    {
+      "column_text": "Дата создания",
+      "background_color": "#2E86C1",
+      "text_color": "#FFFFFF",
+      "text_alignment": {
+        "vertical": "center",
+        "horizontal": "center"
+      },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
+      },
+      "cells": [
+        {
+          "cell_text": "2024-01-15"
+        },
+        {
+          "cell_text": "2024-01-16"
+        },
+        {
+          "cell_text": "2024-01-17"
+        },
+        {
+          "cell_text": "2024-01-18"
+        },
+        {
+          "cell_text": "2024-01-19"
+        },
+        {
+          "cell_text": "2024-01-20"
+        },
+        {
+          "cell_text": "2024-01-21"
+        },
+        {
+          "cell_text": "2024-01-22"
+        }
+      ]
+    },
+    {
+      "column_text": "Дата завершения",
+      "background_color": "#2E86C1",
+      "text_color": "#FFFFFF",
+      "text_alignment": {
+        "vertical": "center",
+        "horizontal": "center"
+      },
+      "sorting": {
+        "type": "alphabetical",
+        "enabled": true
+      },
+      "cells": [
+        {
+          "cell_text": "2024-01-20"
+        },
+        {
+          "cell_text": "2024-01-21"
+        },
+        {
+          "cell_text": "2024-01-22"
+        },
+        {
+          "cell_text": "2024-01-23"
+        },
+        {
+          "cell_text": "-"
+        },
+        {
+          "cell_text": "-"
+        },
+        {
+          "cell_text": "2024-01-24"
+        },
+        {
+          "cell_text": "-"
+        }
+      ]
+    },
+    {
+      "column_text": "Сложность",
+      "background_color": "#2E86C1",
+      "text_color": "#FFFFFF",
+      "text_alignment": {
+        "vertical": "center",
+        "horizontal": "center"
+      },
+      "sorting": {
+        "type": "numeric",
+        "enabled": true
+      },
+      "cells": [
+        {
+          "cell_text": "5"
+        },
+        {
+          "cell_text": "3"
+        },
+        {
+          "cell_text": "4"
+        },
+        {
+          "cell_text": "2"
+        },
+        {
+          "cell_text": "7"
+        },
+        {
+          "cell_text": "6"
+        },
+        {
+          "cell_text": "3"
+        },
+        {
+          "cell_text": "4"
+        }
+      ]
+    },
+    {
+      "column_text": "Прогресс",
+      "background_color": "#2E86C1",
+      "text_color": "#FFFFFF",
+      "text_alignment": {
+        "vertical": "center",
+        "horizontal": "center"
+      },
+      "sorting": {
+        "type": "numeric",
+        "enabled": true
+      },
+      "cells": [
+        {
+          "cell_text": "100"
+        },
+        {
+          "cell_text": "100"
+        },
+        {
+          "cell_text": "100"
+        },
+        {
+          "cell_text": "100"
+        },
+        {
+          "cell_text": "65"
+        },
+        {
+          "cell_text": "45"
+        },
+        {
+          "cell_text": "100"
+        },
+        {
+          "cell_text": "75"
+        }
+      ]
+    },
+    {
+      "column_text": "Количество зависимостей",
+      "background_color": "#2E86C1",
+      "text_color": "#FFFFFF",
+      "text_alignment": {
+        "vertical": "center",
+        "horizontal": "center"
+      },
+      "sorting": {
+        "type": "numeric",
+        "enabled": true
+      },
+      "cells": [
+        {
+          "cell_text": "2"
+        },
+        {
+          "cell_text": "1"
+        },
+        {
+          "cell_text": "0"
+        },
+        {
+          "cell_text": "0"
+        },
+        {
+          "cell_text": "3"
+        },
+        {
+          "cell_text": "2"
+        },
+        {
+          "cell_text": "1"
+        },
+        {
+          "cell_text": "2"
+        }
+      ]
     }
 ]
