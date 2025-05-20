@@ -1,10 +1,14 @@
-import RequirementsApp from "./pages/RequirementsApp";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="flex justify-center items-center mx-auto h-screen w-full">
-      {/* <TableDemo /> */}
-      <RequirementsApp />
-    </div>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/requirements");
+  }, [router]);
+
+  return null;
 }
